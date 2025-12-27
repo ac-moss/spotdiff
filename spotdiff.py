@@ -4,6 +4,10 @@ import argparse
 import re
 import difflib
 
+
+OUTPUT_DIR="logs"
+
+
 def normalize(s):
     if s is None:
         return ""
@@ -133,9 +137,10 @@ def main(csv_path, dir_path, output_path):
         print("  • missing.txt   → Tracks in CSV that are NOT found "
             "in the directory")
 
-        write_list_to_file("csv.txt", csv_keys)
-        write_list_to_file("directory.txt", dir_tracks)
-        write_list_to_file("missing.txt", missing_from_dir)
+        os.makedirs(OUTPUT_DIR, exist_ok=True)
+        write_list_to_file(os.path.join(OUTPUT_DIR, "csv.txt"), csv_keys)
+        write_list_to_file(os.path.join(OUTPUT_DIR, "directory.txt"), dir_tracks)
+        write_list_to_file(os.path.join(OUTPUT_DIR,"missing.txt"), missing_from_dir)
 
         print("[DEBUG] Done writing debug files.\n")
 
