@@ -1,6 +1,9 @@
 import csv
 import os
 import spotipy
+import argparse
+from dotenv import load_dotenv
+from datetime import datetime
 from spotipy.oauth2 import SpotifyOAuth
 
 
@@ -22,10 +25,13 @@ def load_track_uris(csv_path):
     return uris
 
 
-def create_playlist_from_csv(csv_path, playlist_name="SpotDiff Missing Tracks"):
+def create_playlist_from_csv(csv_path, playlist_name=None):
+        # If no name provided, use default + current date
+    if playlist_name is None:
+        date_str = datetime.now().strftime("%Y-%m-%d")
+        playlist_name = f"SpotDiff Missing Tracks {date_str}"
+
     sp = spotipy.Spotify(auth_manager=SpotifyOAuth(
-        client_id="0932f269223245b3871b618ee782ff15",
-        client_secret="37fe346ed2204056903ca190c915ad52",
         redirect_uri="http://127.0.0.1:8888/callback",
         scope="playlist-modify-private playlist-modify-public"
     ))
@@ -54,5 +60,11 @@ def create_playlist_from_csv(csv_path, playlist_name="SpotDiff Missing Tracks"):
 
 
 if __name__ == "__main__":
-    csv_path = "missing.csv"  # <-- your file
-    create_playlist_from_csv(csv_path)
+    parser = argparse.ArgumentParser(description="Create a spotify playlist from csv following exportify.net schema")
+    parser.add_argument("csv", help="Path to Spotify CSV file")
+    args = parser.parse_args()
+    
+    load_dotenv()
+    client_id = os.environ.get("SPOTIPY_CLIENT_ID")
+    client_secret = os.environ.get("SPOTIPY_CLIENT_SECRET")
+    create_playlist_from_csv(args.csv)
