@@ -3,7 +3,7 @@ import os
 import argparse
 import re
 import difflib
-
+from mutagen.easyid3 import EasyID3
 
 OUTPUT_DIR="logs"
 
@@ -49,6 +49,29 @@ def normalize_track_only_map(csv_path):
                 track_only_map[track] = row
 
     return track_only_map
+
+
+# EXPERIMENTAL - DO NOT USE YET
+def read_directory_tracks_with_artist2(dir_path):
+    
+    files_with_artist = set()
+
+    for root, _, filenames in os.walk(dir_path):
+        for name in filenames:
+            base, _ = os.path.splitext(name)
+            norm = normalize(base)
+            artist = ""
+
+            try:
+                tags = EasyID3(name)
+                artist= tags.get("artist", ["Unknown Artist"])[0]
+            except Exception:
+                artist = "Unknown Artist"
+
+            files_with_artist.add(f"{norm} {artist}")
+
+    return files_with_artist
+         
 
 def read_directory_tracks_with_artist(dir_path, track_only_map, cutoff=0.7):
     """
@@ -116,6 +139,7 @@ def main(csv_path, dir_path, output_path):
     track_only_map = normalize_track_only_map(csv_path)
 
     # directory → enriched with artist names
+    #dir_tracks = read_directory_tracks_with_artist2(dir_path)
     dir_tracks = read_directory_tracks_with_artist(dir_path, track_only_map)
 
     csv_keys = set(track_map.keys())
@@ -141,6 +165,7 @@ def main(csv_path, dir_path, output_path):
         write_list_to_file(os.path.join(OUTPUT_DIR, "csv.txt"), csv_keys)
         write_list_to_file(os.path.join(OUTPUT_DIR, "directory.txt"), dir_tracks)
         write_list_to_file(os.path.join(OUTPUT_DIR,"missing.txt"), missing_from_dir)
+        write_list_to_file(os.path.join(OUTPUT_DIR,"track_only_map.txt"), track_only_map)
 
         print("[DEBUG] Done writing debug files.\n")
 
