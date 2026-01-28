@@ -4,7 +4,9 @@ import argparse
 import re
 import difflib
 from mutagen.easyid3 import EasyID3
+import sys
 
+sys.stdout.reconfigure(encoding='utf-8')
 OUTPUT_DIR="logs"
 
 
